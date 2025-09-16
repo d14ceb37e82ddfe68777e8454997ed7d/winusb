@@ -24,8 +24,9 @@ jobs:
           ./configure --prefix=$(realpath ../prefix) --without-ntfs-3g --without-fuse
           make CFLAGS="-static"
           make install
-          cd ..
-          cp prefix/bin/wimsplit artifact/wimsplit
+          cd ../artifact
+          cp ../prefix/bin/wimsplit wimsplit
+          sed "s/SHASUM1/$(shasum --algorithm 256 wimsplit)/" ../winusb.sh > winusb.sh
       - uses: actions/upload-artifact@v4
         with:
           path: artifact
