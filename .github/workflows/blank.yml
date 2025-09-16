@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run a multi-line script
+        run: |
+          brew install autoconf automake libtool pkgconf
+          git clone https://github.com/ebiggers/wimlib.git
+          mkdir prefix artifact
+          cd wimlib
+          git checkout cd2a5e5d2e95c36e81d09077d06ad136f7d24950
+          ./bootstrap
+          ./configure --prefix=$(realpath ../prefix) --without-ntfs-3g --without-fuse
+          make CFLAGS="-static"
+          make install
+          cd ..
+          cp prefix/bin/wimsplit artifact/wimsplit
+      - uses: actions/upload-artifact@v4
+        with:
+          path: artifact
